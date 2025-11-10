@@ -1,4 +1,4 @@
-import db from "../config/db.js"; 
+const db = require('../db')
 
 const MessageModel = {
   
@@ -14,4 +14,4 @@ const MessageModel = {
   }
 };
 
-export default MessageModel;
+module.exports = MessageModel

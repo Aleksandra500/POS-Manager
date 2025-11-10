@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const messageRoute = require('./routes/messageRoute')
 const db = require('./db');
 const chatSocket = require('./socket/chat')
 const cors = require('cors');
@@ -20,6 +21,8 @@ app.use(cors({
 
 chatSocket(io)
  
+app.use('/api/messages', messageRoute)
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () =>
 	console.log(`Server je pokrenut na ${PORT} `)
