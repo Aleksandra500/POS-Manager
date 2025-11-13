@@ -1,36 +1,34 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getAllUsers } from "../services/userService";
 
-function UserComponents({ currentUser, onSelectUser }) {
+export default function UserComponents({ onSelectUser, currentUser }) {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const data = await getAllUsers();
-        setUsers(data.filter(u => u.username !== currentUser)); // ne prikazuj sebe
+        setUsers(data);
       } catch (err) {
         console.error(err);
       }
     };
-
     fetchUsers();
-  }, [currentUser]);
+  }, []);
 
   return (
-    <div className="w-48 bg-white shadow rounded p-2 mr-2 overflow-y-auto">
-      <h2 className="font-semibold mb-2">Users</h2>
-      {users.map((u) => (
-        <div
-          key={u.id}
-          className="cursor-pointer hover:bg-gray-200 p-1 rounded"
-          onClick={() => onSelectUser(u.username)}
-        >
-          {u.username}
-        </div>
-      ))}
+    <div className="flex flex-col gap-2">
+      {users
+        .filter(user => user.username !== currentUser) // ne prikazuj sebe
+        .map(user => (
+          <button
+            key={user.id}
+            onClick={() => onSelectUser(user.username)}
+            className="bg-white hover:bg-indigo-100 text-indigo-800 px-4 py-2 rounded-xl shadow-md text-left transition-all duration-200"
+          >
+            {user.username}
+          </button>
+        ))}
     </div>
   );
 }
-
-export default UserComponents;

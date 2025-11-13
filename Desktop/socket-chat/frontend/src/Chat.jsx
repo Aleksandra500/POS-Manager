@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getMessages, sendMessage } from "./services/messageService";
 import UserComponents from "./components/UserComponents";
 
-function ChatPage({ currentUser, onSelectUser }) {
+export default function ChatPage({ currentUser, onSelectUser }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
 
@@ -12,10 +12,9 @@ function ChatPage({ currentUser, onSelectUser }) {
         const data = await getMessages();
         setMessages(data);
       } catch (error) {
-        console.error("Greška pri dohvatanju poruka:", error);
+        console.error(error);
       }
     };
-
     fetchMessages();
   }, []);
 
@@ -24,31 +23,38 @@ function ChatPage({ currentUser, onSelectUser }) {
     if (!text.trim()) return;
 
     const newMessage = { sender: currentUser, text };
-
     try {
       const saved = await sendMessage(newMessage);
-      setMessages((prev) => [...prev, saved]);
+      setMessages(prev => [...prev, saved]);
       setText("");
-    } catch (error) {
-      console.error("Greška pri slanju poruke:", error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   return (
-    <div className="flex h-screen">
-      {/* Lista korisnika */}
-      <UserComponents onSelectUser={onSelectUser} currentUser={currentUser} />
+    <div className="flex flex-1 h-full">
+      {/* Sidebar */}
+      <div className="w-1/4 bg-indigo-50 p-4 overflow-y-auto rounded-l-2xl shadow-inner">
+        <h2 className="text-xl font-bold mb-4 text-indigo-800">👥 Users</h2>
+        <UserComponents onSelectUser={onSelectUser} />
+      </div>
 
-      {/* Global chat */}
-      <div className="flex-1 flex flex-col p-4 bg-gray-100">
-        <h1 className="text-2xl font-semibold text-center mb-4">💬 Global Chat</h1>
-        <div className="flex-1 overflow-y-auto mb-4 p-3 bg-white rounded-xl shadow">
+      {/* Glavni chat */}
+      <div className="flex-1 flex flex-col p-4 bg-purple-50 rounded-r-2xl">
+        <h1 className="text-2xl font-bold text-center mb-4 text-purple-700">💬 Global Chat</h1>
+        <div className="flex-1 overflow-y-auto mb-4 p-3 bg-white rounded-2xl shadow-inner">
           {messages.length === 0 ? (
             <p className="text-gray-400 text-center">Nema poruka još 😄</p>
           ) : (
-            messages.map((msg) => (
-              <div key={msg.id || msg.timestamp} className="mb-2">
-                <strong>{msg.sender}:</strong> <span>{msg.text}</span>
+            messages.map(msg => (
+              <div
+                key={msg.id || msg.timestamp}
+                className={`mb-2 p-2 max-w-[70%] rounded-xl shadow ${
+                  msg.sender === currentUser ? "bg-blue-200 self-end" : "bg-gray-200 self-start"
+                }`}
+              >
+                <strong className="text-blue-800">{msg.sender}:</strong> <span>{msg.text}</span>
               </div>
             ))
           )}
@@ -60,11 +66,11 @@ function ChatPage({ currentUser, onSelectUser }) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Unesi poruku..."
-            className="flex-1 border rounded-xl p-2 outline-none"
+            className="flex-1 border rounded-full p-3 outline-none shadow-md"
           />
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-4"
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6 shadow-md"
           >
             Pošalji
           </button>
@@ -73,5 +79,3 @@ function ChatPage({ currentUser, onSelectUser }) {
     </div>
   );
 }
-
-export default ChatPage;
