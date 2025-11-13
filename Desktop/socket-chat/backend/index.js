@@ -14,7 +14,7 @@ app.use(express.json());
 
 // DOZVOLJENI FRONTEND DOMENI
 const allowedOrigins = [
-  'http://localhost:5173', // razvojni frontend
+  'http://localhost:5173', // lokalni frontend
   'https://socket-chat-9ibl-b0t3hlfd1-aleksandras-projects-79a46c16.vercel.app', // Vercel frontend
 ];
 
@@ -25,7 +25,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.log('Blocked by CORS:', origin);
+        console.log('Blocked REST API by CORS:', origin);
         callback(new Error('Not allowed by CORS'));
       }
     },
@@ -35,10 +35,17 @@ app.use(
 
 const server = http.createServer(app);
 
-// Socket.io sa istim allowedOrigins
+// Socket.IO sa dinamičkim CORS-om
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log('Blocked Socket.IO by CORS:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST'],
     credentials: true,
   },

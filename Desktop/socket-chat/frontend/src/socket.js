@@ -1,8 +1,11 @@
-import { io } from "socket.io-client"
+import { io } from "socket.io-client";
 
 
-const socket = io("https://aleksandra-socket.alwaysdata.net", {
-  transports: ["websocket"],
+const BACKEND_URL =
+  import.meta.env.VITE_API_URL || "https://aleksandra-socket.alwaysdata.net";
+
+const socket = io(BACKEND_URL, {
+  transports: ["websocket"], 
   withCredentials: true,      
 });
 
