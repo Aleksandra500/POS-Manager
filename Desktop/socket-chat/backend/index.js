@@ -12,28 +12,47 @@ const db = require('./db');
 const app = express();
 app.use(express.json());
 
+// DOZVOLJENI FRONTEND DOMENI
+const allowedOrigins = [
+  'http://localhost:5173', // razvojni frontend
+  'https://socket-chat-9ibl-b0t3hlfd1-aleksandras-projects-79a46c16.vercel.app', // Vercel frontend
+];
+
+// Middleware za REST API CORS
 app.use(
-	cors({
-		origin: 'https://aleksandra-socket.alwaysdata.net',
-		credentials: true,
-	})
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log('Blocked by CORS:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
 );
 
 const server = http.createServer(app);
 
+// Socket.io sa istim allowedOrigins
 const io = new Server(server, {
-	cors: {
-		origin: 'https://aleksandra-socket.alwaysdata.net',
-		methods: ['GET', 'POST'],
-	},
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
 });
 
+// Socket logika
 chatSocket(io);
 
+// REST API rute
 app.use('/api/messages', messageRoute);
 app.use('/api/users', userRoute);
 
+// Pokretanje servera
 const PORT = process.env.PORT || 8100;
 server.listen(PORT, () =>
-	console.log(`Server je pokrenut na ${PORT} `)
+  console.log(`Server je pokrenut na portu ${PORT}`)
 );
