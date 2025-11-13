@@ -1,5 +1,6 @@
-const MessageModel = require("../models/messageModel") 
+const MessageModel = require("../models/messageModel");
 
+// GLOBAL
 const getAllMessages = (req, res) => {
   MessageModel.getAllMessages((err, results) => {
     if (err) {
@@ -9,7 +10,6 @@ const getAllMessages = (req, res) => {
     res.json(results);
   });
 };
-
 
 const addMessage = (req, res) => {
   const { sender, text } = req.body;
@@ -34,4 +34,40 @@ const addMessage = (req, res) => {
   });
 };
 
-module.exports = { getAllMessages, addMessage }
+// PRIVATNI CHAT
+const getPrivateMessages = (req, res) => {
+  const { roomId } = req.params;
+  MessageModel.getPrivateMessages(roomId, (err, results) => {
+    if (err) {
+      console.error("Greška pri dohvatanju privatnih poruka:", err);
+      return res.status(500).json({ error: "Greška pri dohvatanju privatnih poruka" });
+    }
+    res.json(results);
+  });
+};
+
+const addPrivateMessage = (req, res) => {
+  const { roomId, sender, text } = req.body;
+
+  if (!roomId || !sender || !text) {
+    return res.status(400).json({ error: "Nedostaje roomId, sender ili text" });
+  }
+
+  MessageModel.addPrivateMessage(roomId, sender, text, (err, result) => {
+    if (err) {
+      console.error("Greška pri dodavanju privatne poruke:", err);
+      return res.status(500).json({ error: "Greška pri dodavanju privatne poruke" });
+    }
+
+    res.status(201).json({
+      message: "Privatna poruka uspešno dodata",
+      id: result.insertId,
+      roomId,
+      sender,
+      text,
+      timestamp: new Date(),
+    });
+  });
+};
+
+module.exports = { getAllMessages, addMessage, getPrivateMessages, addPrivateMessage };

@@ -1,11 +1,13 @@
-const express = require('express')
-const messageController = require('../controllers/messageController')
+const express = require('express');
+const router = express.Router();
+const messageController = require('../controllers/messageController');
 
+// GLOBALNI CHAT
+router.get('/', messageController.getAllMessages);
+router.post('/', messageController.addMessage);
 
-const router = express.Router()
-
-router.route('/').get(messageController.getAllMessages)
-router.route('/').post(messageController.addMessage)
-
+// PRIVATNI CHAT
+router.get('/private/:roomId', messageController.getPrivateMessages);
+router.post('/private', messageController.addPrivateMessage);
 
 module.exports = router;

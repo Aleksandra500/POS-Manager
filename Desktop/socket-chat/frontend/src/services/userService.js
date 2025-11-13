@@ -11,3 +11,13 @@ export const loginUser = async (username) => {
     throw error;
   }
 };
+
+export const getAllUsers = async () => {
+  try {
+    const res = await axios.get(API_URL);
+    return res.data;
+  } catch (err) {
+    console.error("Error:", err);
+    throw err;
+  }
+};

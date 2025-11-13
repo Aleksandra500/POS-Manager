@@ -27,4 +27,19 @@ const addUser = (req, res) => {
   });
 };
 
-module.exports = { addUser };
+const getAllUsers = (req, res) => {
+  const query = "SELECT * FROM users";
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Database error", error: err });
+    }
+
+    res.status(200).json(results);
+  });
+};
+
+module.exports = { addUser, getAllUsers };
