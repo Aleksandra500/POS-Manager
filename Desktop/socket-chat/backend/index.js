@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const cors = require('cors');
 
 const messageRoute = require('./routes/messageRoute');
 const userRoute = require('./routes/userRoute');
@@ -19,20 +18,24 @@ const allowedOrigins = [
   'https://socket-chat-9ibl.vercel.app', // kratki Vercel URL
 ];
 
-// Middleware za REST API CORS
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log('Blocked REST API by CORS:', origin);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  })
-);
+console.log("🔥 LOADED BACKEND VERSION 7 🔥");
+// Middleware za REST API i preflight OPTIONS
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  }
+
+  // Odgovor odmah za OPTIONS (preflight)
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 const server = http.createServer(app);
 
@@ -59,19 +62,22 @@ chatSocket(io);
 app.use('/api/messages', messageRoute);
 app.use('/api/users', (req, res, next) => {
   const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin)) {
+  if (allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') return res.sendStatus(200); // preflight
     next();
   } else {
     res.status(403).send('Not allowed by CORS');
   }
 }, userRoute);
 
+
 // Pokretanje servera
 const PORT = process.env.PORT || 8100;
 server.listen(PORT, () =>
   console.log(`Server je pokrenut na portu ${PORT}`)
+
 );

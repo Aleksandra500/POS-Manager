@@ -24,7 +24,7 @@ export default function UserComponents({ onSelectUser, currentUser }) {
           <button
             key={user.id}
             onClick={() => onSelectUser(user.username)}
-            className="bg-white hover:bg-indigo-100 text-indigo-800 px-4 py-2 rounded-xl shadow-md text-left transition-all duration-200"
+            className="w-full bg-white hover:bg-indigo-100 text-indigo-800 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-md text-left text-sm sm:text-base transition-all duration-200"
           >
             {user.username}
           </button>

@@ -33,17 +33,17 @@ export default function ChatPage({ currentUser, onSelectUser }) {
   };
 
   return (
-    <div className="flex flex-1 h-full">
+    <div className="flex flex-1 h-full flex-col sm:flex-row">
       {/* Sidebar */}
-      <div className="w-1/4 bg-indigo-50 p-4 overflow-y-auto rounded-l-2xl shadow-inner">
-        <h2 className="text-xl font-bold mb-4 text-indigo-800">👥 Users</h2>
+      <div className="w-full sm:w-1/4 bg-indigo-50 p-2 sm:p-4 overflow-y-auto rounded-t-2xl sm:rounded-l-2xl shadow-inner">
+        <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-4 text-indigo-800">👥 Users</h2>
         <UserComponents onSelectUser={onSelectUser} />
       </div>
 
       {/* Glavni chat */}
-      <div className="flex-1 flex flex-col p-4 bg-purple-50 rounded-r-2xl">
-        <h1 className="text-2xl font-bold text-center mb-4 text-purple-700">💬 Global Chat</h1>
-        <div className="flex-1 overflow-y-auto mb-4 p-3 bg-white rounded-2xl shadow-inner">
+      <div className="flex-1 flex flex-col p-2 sm:p-4 bg-purple-50 rounded-b-2xl sm:rounded-r-2xl mt-2 sm:mt-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-center mb-2 sm:mb-4 text-purple-700">💬 Global Chat</h1>
+        <div className="flex-1 overflow-y-auto mb-2 sm:mb-4 p-2 sm:p-3 bg-white rounded-2xl shadow-inner">
           {messages.length === 0 ? (
             <p className="text-gray-400 text-center">Nema poruka još 😄</p>
           ) : (
@@ -66,11 +66,11 @@ export default function ChatPage({ currentUser, onSelectUser }) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Unesi poruku..."
-            className="flex-1 border rounded-full p-3 outline-none shadow-md"
+            className="flex-1 border rounded-full p-2 sm:p-3 text-sm sm:text-base outline-none shadow-md"
           />
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6 shadow-md"
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4 sm:px-6 py-2 shadow-md text-sm sm:text-base"
           >
             Pošalji
           </button>
