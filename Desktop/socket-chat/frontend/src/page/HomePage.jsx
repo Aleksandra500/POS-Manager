@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import LoginPage from "./LoginPage";
 import PrivateChat from "./PrivateChat";
-import ChatPage from "../Chat";
 import { getAllUsers } from "../services/userService";
 
 export default function HomePage() {
@@ -9,12 +8,6 @@ export default function HomePage() {
   const [privateRoom, setPrivateRoom] = useState(null);
   const [users, setUsers] = useState([]);
   const [showGlobalChat, setShowGlobalChat] = useState(false);
-
-  // Učitavanje trenutno prijavljenog korisnika
-  useEffect(() => {
-    const savedUser = localStorage.getItem("chatUser");
-    setUser(savedUser || null);
-  }, []);
 
   // Učitavanje liste korisnika
   useEffect(() => {
@@ -29,6 +22,11 @@ export default function HomePage() {
     fetchUsers();
   }, []);
 
+  const handleLogin = (username) => {
+    localStorage.setItem("chatUser", username);
+    setUser(username);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("chatUser");
     setUser(null);
@@ -36,23 +34,21 @@ export default function HomePage() {
     setShowGlobalChat(false);
   };
 
-  if (!user) return <LoginPage onLogin={(username) => setUser(username)} />;
+  // Ako nema user-a, prikaži login
+  if (!user) return <LoginPage onLogin={handleLogin} />;
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-black text-white">
-      {/* Sidebar sa korisnicima i global chat dugmetom */}
+      {/* Sidebar */}
       <aside className="w-72 bg-[#0f1724] border-r border-white/6 p-4 flex flex-col justify-between">
         <div className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold mb-2">Users</h2>
           {users
-            .filter((u) => u.username !== user) // ne prikazuj sebe
+            .filter((u) => u.username !== user)
             .map((u) => (
               <button
                 key={u.id}
-                onClick={() => {
-                  setPrivateRoom({ targetUser: u.username });
-                  setShowGlobalChat(false);
-                }}
+                onClick={() => setPrivateRoom({ targetUser: u.username })}
                 className="flex items-center gap-3 w-full text-left px-3 py-2 rounded-md hover:bg-white/6 transition"
               >
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center text-xs font-semibold">
@@ -68,10 +64,7 @@ export default function HomePage() {
 
         <div className="flex flex-col gap-2 mt-4">
           <button
-            onClick={() => {
-              setShowGlobalChat(true);
-              setPrivateRoom(null);
-            }}
+            onClick={() => setShowGlobalChat(true)}
             className="bg-white/6 hover:bg-white/10 text-white px-3 py-2 rounded-full shadow-md"
           >
             🌐 Global Chat
@@ -85,19 +78,18 @@ export default function HomePage() {
         </div>
       </aside>
 
-      {/* Glavni prikaz: privatni chat ili global chat */}
+      {/* Glavni prikaz */}
       <main className="flex-1 flex flex-col overflow-hidden p-4">
         {privateRoom ? (
           <PrivateChat
             currentUser={user}
             targetUser={privateRoom.targetUser}
-            onClose={() => {
-              setPrivateRoom(null);
-              setShowGlobalChat(true); // vraća na global chat
-            }}
+            onClose={() => setPrivateRoom(null)}
           />
         ) : showGlobalChat ? (
-          <ChatPage currentUser={user} />
+          <div className="flex-1 flex items-center justify-center text-white/60">
+            🌐 Global Chat Page (sadržaj ovde)
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-white/60">
             Izaberi korisnika ili Global Chat
