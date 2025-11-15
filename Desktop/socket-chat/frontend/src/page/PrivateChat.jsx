@@ -1,117 +1,117 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
-	getPrivateMessages,
-	sendPrivateMessage,
-} from '../services/privateMessageService';
-import socket from '../socket'; 
+  getPrivateMessages,
+  sendPrivateMessage,
+} from "../services/privateMessageService";
+import socket from "../socket";
 
 export default function PrivateChat({ currentUser, targetUser, onClose }) {
-	const [messages, setMessages] = useState([]);
-	const [text, setText] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState("");
 
-	useEffect(() => {
-		const roomId = [currentUser, targetUser].sort().join('-');
+  useEffect(() => {
+    const roomId = [currentUser, targetUser].sort().join("-");
 
-		socket.emit('joinRoom', { currentUser, targetUser });
+    socket.emit("joinRoom", { currentUser, targetUser });
 
-		socket.on('receivePrivateMessage', (msg) => {
-			if (msg.roomId === roomId) {
-				setMessages((prev) => [...prev, msg]);
-			}
-		});
+    socket.on("receivePrivateMessage", (msg) => {
+      if (msg.roomId === roomId) {
+        setMessages((prev) => [...prev, msg]);
+      }
+    });
 
-		const fetchMessages = async () => {
-			try {
-				const data = await getPrivateMessages(roomId);
-				setMessages(data);
-			} catch (err) {
-				console.error(err);
-			}
-		};
-		fetchMessages();
+    const fetchMessages = async () => {
+      try {
+        const data = await getPrivateMessages(roomId);
+        setMessages(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchMessages();
 
-		return () => {
-			socket.off('receivePrivateMessage');
-		};
-	}, [currentUser, targetUser]);
+    return () => {
+      socket.off("receivePrivateMessage");
+    };
+  }, [currentUser, targetUser]);
 
-	const handleSend = async (e) => {
-		e.preventDefault();
-		if (!text.trim()) return;
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!text.trim()) return;
 
-		const roomId = [currentUser, targetUser].sort().join('-');
-		const message = { currentUser, targetUser, text };
+    const roomId = [currentUser, targetUser].sort().join("-");
+    const message = { currentUser, targetUser, text };
 
-		socket.emit('sendPrivateMessage', message);
-		setText('');
+    socket.emit("sendPrivateMessage", message);
+    setText("");
 
-		try {
-			const saved = await sendPrivateMessage({
-				roomId,
-				sender: currentUser,
-				receiver: targetUser,
-				text,
-			});
+    try {
+      const saved = await sendPrivateMessage({
+        roomId,
+        sender: currentUser,
+        receiver: targetUser,
+        text,
+      });
 
-			setMessages((prev) => [...prev, saved]);
-			setText('');
-		} catch (err) {
-			console.error(err);
-		}
-	};
+      setMessages((prev) => [...prev, saved]);
+      setText("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-	return (
-		<div className='flex flex-col h-full bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 p-2 sm:p-4 rounded-2xl shadow-lg'>
-			{/* Header */}
-			<div className='flex justify-between items-center mb-2 sm:mb-4'>
-				<h2 className='text-lg sm:text-xl font-bold text-purple-700'>
-					💌 Chat with {targetUser}
-				</h2>
-				<button
-					onClick={onClose}
-					className='bg-gray-200 hover:bg-gray-300 px-2 py-1 text-sm sm:px-3 sm:py-1.5 rounded-full shadow'>
-					Close
-				</button>
-			</div>
+  return (
+    <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 via-indigo-950 to-black p-2 sm:p-4 rounded-2xl shadow-lg text-white">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-2 sm:mb-4">
+        <h2 className="text-lg sm:text-xl font-bold">
+          💌 Chat with {targetUser}
+        </h2>
+        <button
+          onClick={onClose}
+          className="bg-white/6 hover:bg-white/10 px-2 py-1 text-sm sm:px-3 sm:py-1.5 rounded-full shadow"
+        >
+          Close
+        </button>
+      </div>
 
-			{/* Messages */}
-			<div className='flex-1 overflow-y-auto mb-2 sm:mb-4 p-2 sm:p-3 bg-white rounded-2xl shadow-inner'>
-				{messages.length === 0 ? (
-					<p className='text-gray-400 text-center'>Nema poruka 😄</p>
-				) : (
-					messages.map((msg) => (
-						<div
-							key={msg.id || msg.timestamp}
-							className={`mb-2 p-2 max-w-[70%] rounded-xl shadow ${
-								msg.sender === currentUser
-									? 'bg-blue-200 self-end'
-									: 'bg-pink-200 self-start'
-							}`}
-						>
-							<strong className='text-purple-800'>
-								{msg.sender}:
-							</strong>{' '}
-							<span>{msg.text}</span>
-						</div>
-					))
-				)}
-			</div>
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto mb-2 sm:mb-4 p-2 sm:p-3 bg-[#0f1724] rounded-2xl shadow-inner flex flex-col gap-2">
+        {messages.length === 0 ? (
+          <p className="text-white/60 text-center mt-2">Nema poruka 😄</p>
+        ) : (
+          messages.map((msg) => (
+            <div
+              key={msg.id || msg.timestamp}
+              className={`p-3 max-w-[70%] rounded-2xl break-words shadow-sm ${
+                msg.sender === currentUser
+                  ? "ml-auto bg-gradient-to-br from-purple-600 to-indigo-500 text-white"
+                  : "mr-auto bg-white/6 text-white"
+              }`}
+            >
+              <div className="text-xs text-white/80 mb-1">{msg.sender}</div>
+              <div className="text-sm leading-relaxed">{msg.text}</div>
+            </div>
+          ))
+        )}
+      </div>
 
-			{/* Input */}
-			<form onSubmit={handleSend} className='flex gap-2'>
-				<input
-					type='text'
-					value={text}
-					onChange={(e) => setText(e.target.value)}
-					placeholder='Unesi poruku...'
-					className='flex-1 border rounded-full p-2 sm:p-3 text-sm sm:text-base outline-none shadow-md'
-				/>
-				<button
-					type='submit'
-					className='bg-purple-500 hover:bg-purple-600 text-white rounded-full px-4 sm:px-6 py-2 sm:py-2 shadow-md text-sm sm:text-base'>
-					Pošalji
-				</button>
-			</form>
-		</div>
-	);
+      {/* Input */}
+      <form onSubmit={handleSend} className="flex gap-2">
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Unesi poruku..."
+          className="flex-1 bg-white/6 rounded-full px-4 py-3 outline-none placeholder-white/50 text-white shadow-md"
+        />
+        <button
+          type="submit"
+          className="bg-gradient-to-br from-purple-600 to-indigo-500 px-5 py-2 rounded-full shadow-md text-white font-medium hover:opacity-90 transition"
+        >
+          Pošalji
+        </button>
+      </form>
+    </div>
+  );
 }

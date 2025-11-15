@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import { getMessages, sendMessage } from "../services/messageService";
-import { getAllUsers } from "../services/userService";
+import { getMessages, sendMessage } from "./services/messageService";
+import { getAllUsers } from "./services/userService";
 
 export default function ChatPage({ currentUser, onSelectUser }) {
   const [messages, setMessages] = useState([]);
